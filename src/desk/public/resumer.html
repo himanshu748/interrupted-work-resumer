@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interrupted Work Resumer</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/fonts.css">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/resumer-design.css">
+  <script type="module" src="/resumer.js"></script>
+</head>
+<body class="resumer-app">
+  <a class="skip-link" href="#resumer-workspace">Skip to workspace</a>
+  <div class="app-shell">
+    <header class="app-header">
+      <a class="brand" href="/">Home</a>
+      <nav class="project-nav" aria-label="Resumer navigation">
+        <a href="/products/resumer">About Resumer</a>
+        <a href="/resumer" aria-current="page">Workspace</a>
+      </nav>
+    </header>
+    <main id="resumer-workspace" class="workspace stack">
+      <header class="resumer-workspace-heading">
+        <div>
+        <h1>Interrupted Work Resumer</h1>
+        <p>Save your next action with selected project files. When you return, compare those files and download a continuation note.</p>
+        </div>
+        <p class="resumer-boundary">Your files, your next move.<br><span>Local comparison. Actions and blockers remain yours to review.</span></p>
+      </header>
+      <ol class="resumer-path" aria-label="Continuation workflow" data-state="entry">
+        <li><a href="#checkpoint-title"><span>Save a checkpoint</span><small>Files + the thought you left with</small></a></li>
+        <li><a href="#saved-title"><span>Read what changed</span><small>Compare against the saved files</small></a></li>
+        <li><span>Continue with context</span><small>A note you can review and download</small></li>
+      </ol>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+      <div class="two-column resumer-workbench">
+        <section class="panel stack resumer-checkpoint-paper" aria-labelledby="checkpoint-title">
+          <div class="resumer-section-intro">
+            <h2 id="checkpoint-title">Save a checkpoint</h2>
+            <p class="muted">Choose non-sensitive UTF-8 text files. Their full contents will be stored locally. Up to 50 files, 64 KiB each.</p>
+          </div>
+          <form id="checkpoint-form" class="stack">
+            <div class="field">
+              <label for="project-directory">Project directory</label>
+              <input id="project-directory" name="projectDirectory" value="." required autocomplete="off" spellcheck="false" aria-describedby="workspace-help">
+              <p id="workspace-help" class="muted">Relative to <code id="workspace-root">the configured workspace</code>. Use . for the workspace itself.</p>
+            </div>
+            <div class="field">
+              <label for="selected-files">Selected files</label>
+              <textarea id="selected-files" name="files" rows="4" required spellcheck="false" placeholder="README.md&#10;docs/plan.md" aria-describedby="files-help"></textarea>
+              <p id="files-help" class="muted">One path per line, relative to the project directory. Only these paths are inspected. Credential paths and symlinks are refused.</p>
+            </div>
+            <div class="field">
+              <label for="goal">Goal</label>
+              <textarea id="goal" name="goal" rows="2" maxlength="4000" required placeholder="What are you trying to finish?"></textarea>
+            </div>
+            <div class="field">
+              <label for="next-action">Next action</label>
+              <textarea id="next-action" name="nextAction" rows="2" maxlength="4000" required placeholder="The first thing to review or do when you return"></textarea>
+            </div>
+            <details open>
+              <summary>Decisions and blockers (optional)</summary>
+              <div class="stack">
+                <div class="field">
+                  <label for="decisions">Saved decisions</label>
+                  <textarea id="decisions" name="decisions" rows="3" aria-describedby="decisions-help"></textarea>
+                  <p id="decisions-help" class="muted">One decision per line, up to 20. These remain your saved statements.</p>
+                </div>
+                <div class="field">
+                  <label for="blockers">Blockers to revalidate</label>
+                  <textarea id="blockers" name="blockers" rows="3" aria-describedby="blockers-help"></textarea>
+                  <p id="blockers-help" class="muted">One blocker per line, up to 20. File changes never mark a blocker resolved.</p>
+                </div>
+              </div>
+            </details>
+            <button class="button primary" type="submit" id="save-checkpoint">Save checkpoint</button>
+          </form>
+        </section>
+        <section class="panel stack resumer-saved-journal" aria-labelledby="saved-title">
+          <div>
+            <h2 id="saved-title" tabindex="-1">Saved checkpoints</h2>
+            <p class="muted">Select a checkpoint, then compare its selected files with their current contents.</p>
+          </div>
+          <div class="field">
+            <label for="checkpoint-select">Checkpoint</label>
+            <select id="checkpoint-select" disabled><option value="">Loading checkpoints…</option></select>
+          </div>
+          <div id="checkpoint-details" class="stack">
+            <p class="muted">Loading saved context…</p>
+          </div>
+          <div class="actions">
+            <button type="button" id="resume" class="button primary" disabled>Compare and prepare continuation</button>
+            <button type="button" id="refresh" class="button secondary">Refresh checkpoints</button>
+          </div>
+          <section id="saved-artifacts" class="stack" aria-labelledby="saved-artifacts-title" hidden>
+            <h3 id="saved-artifacts-title">Previous continuations</h3>
+            <div id="artifact-list" class="stack"></div>
+          </section>
+          <section class="stack resumer-example" aria-labelledby="example-title">
+            <h3 id="example-title">Try the workflow</h3>
+            <p class="muted">Create a synthetic two-file example. Then change its plan and delete its handoff file to see both observations. Example files live in managed app storage.</p>
+            <div class="actions">
+              <button type="button" id="try-example" class="button secondary">Try example</button>
+              <button type="button" id="change-example" class="button secondary" disabled>Change example files</button>
+            </div>
+          </section>
+        </section>
+      </div>
+      <section id="result" class="panel stack resumer-continuation" aria-labelledby="result-title" hidden>
+        <div class="resumer-continuation-heading">
+          <div>
+            <h2 id="result-title" tabindex="-1">Continuation prepared</h2>
+            <p id="result-summary"></p>
+            <p id="result-source" class="muted"></p>
+          </div>
+          <p class="resumer-document-receipt"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>Saved locally</p>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <caption>Observation for every selected file</caption>
+            <thead><tr><th scope="col">Selected file</th><th scope="col">Observation</th></tr></thead>
+            <tbody id="comparison-body"></tbody>
+          </table>
+        </div>
+        <p class="muted">Only selected files are compared. New, unselected files are outside this report. No action was executed and no blocker was resolved.</p>
+        <div class="actions"><button type="button" id="download" class="button primary">Download continuation (.md)</button></div>
+        <details open>
+          <summary>Continuation text and literal change evidence</summary>
+          <pre id="artifact-preview" tabindex="0" aria-label="Plain-text Markdown continuation"></pre>
+        </details>
+      </section>
+      <section class="panel stack resumer-watch" aria-labelledby="watch-heading">
+        <h2 id="watch-heading">Watch selected files locally</h2>
+        <p class="muted">While the desk is running, check the selected checkpoint’s original files and prepare a continuation when their content or deletion status changes. The document uses that checkpoint’s saved goal, next action, decisions, and blockers. No model, cloud service, or command runs. The saved next action remains unexecuted.</p>
+        <p id="watch-status" role="status">Select a checkpoint to configure a local watch.</p>
+        <p id="watch-error" class="notice" role="status" hidden></p>
+        <div class="field"><label for="watch-interval">Check interval (seconds)</label><input id="watch-interval" type="number" min="30" max="86400" step="1" value="30"><p class="muted">At least 30 seconds. Enabled watches resume when this desk server restarts; they stop when it closes.</p></div>
+        <label><input type="checkbox" id="watch-consent"> Enable this local watch for the selected checkpoint’s files and saved context until I disable it.</label>
+        <div class="actions">
+          <button id="enable-watch" type="button" class="button secondary" disabled>Enable local watch</button>
+          <button id="disable-watch" type="button" class="button secondary" disabled>Disable local watch</button>
+          <button id="refresh-watch" type="button" class="button secondary">Refresh watch status</button>
+          <button id="open-watch-artifact" type="button" class="button secondary" disabled>Open latest watch continuation</button>
+        </div>
+      </section>
+      <section class="panel stack resumer-analysis" aria-labelledby="analysis-heading">
+        <h2 id="analysis-heading">Ask Nemotron for a cited resume plan</h2>
+        <p id="resumer-provider" class="muted">Checking the configured inference destination…</p>
+        <p class="muted">Choose which checkpoint files and saved context to send. The provider receives relative filenames, change statuses, hashes, and before/after excerpts of at most 40 lines and 4,000 characters per side. Up to eight files and 64 KiB total. Omitted content stays outside the analysis.</p>
+        <div id="analysis-selection" class="form-grid">
+          <fieldset class="stack"><legend>Files to disclose</legend><div id="analysis-files" class="stack"><p class="muted">Select a checkpoint first.</p></div></fieldset>
+          <fieldset class="stack"><legend>Saved context to disclose</legend>
+            <label><input type="checkbox" name="analysis-context" value="goal"> Goal</label>
+            <label><input type="checkbox" name="analysis-context" value="nextAction"> Next action</label>
+            <label><input type="checkbox" name="analysis-context" value="decisions"> Decisions</label>
+            <label><input type="checkbox" name="analysis-context" value="blockers"> Blockers</label>
+          </fieldset>
+        </div>
+        <label><input type="checkbox" id="analysis-consent"> Send only these selected excerpts and context to the displayed inference provider for this analysis.</label>
+        <button class="button secondary" type="button" id="analyze" disabled>Analyze selected changes with Nemotron</button>
+        <p class="muted">Suggestions require your review. No saved action is executed and no blocker is validated.</p>
+        <div id="saved-analyses" class="stack"></div>
+        <div id="analysis-result" class="stack" hidden>
+          <h3 id="analysis-result-title" tabindex="-1">Suggested resume plan</h3>
+          <p id="analysis-receipt" class="muted"></p>
+          <div id="analysis-plan" class="stack"></div>
+          <details><summary>Selected evidence and complete plan</summary><pre id="analysis-markdown"></pre></details>
+          <button type="button" class="button secondary" id="download-analysis" disabled>Download cited plan (.md)</button>
+        </div>
+      </section>
+    </main>
+    <footer class="resumer-app-footer"><a href="/products/resumer">About Interrupted Work Resumer</a><p>Selected evidence. Saved context. A considered next step.</p><a href="/">Home</a></footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "kind": "public-projection-of-synthetic-local-continuation",
+  "generatedBy": "actual local Resumer workspace",
+  "sourceSha256": "ba18d5271e71062557ce0e15633cce66e05c293f0c16ace1ee8b8c3e6319c10d",
+  "privateFilesystemPathsOmitted": true,
+  "synthetic": true,
+  "modelUsed": false,
+  "blockersValidated": false,
+  "nextActionExecuted": false,
+  "goal": "Prepare the website preview for review.",
+  "savedAction": "Publish the preview after checking the release plan.",
+  "savedDecisions": [
+    "Use the current layout for the first review."
+  ],
+  "unvalidatedBlockers": [
+    "Shared test account access is unverified."
+  ],
+  "selectedFileObservations": [
+    {
+      "path": "plan.md",
+      "status": "changed",
+      "before": "Next: prepare a public preview.",
+      "after": "Next: review the revised accessibility requirements before publishing."
+    },
+    {
+      "path": "handoff.md",
+      "status": "deleted",
+      "before": "# Handoff\n\nWaiting for access to the shared test account.\n",
+      "after": null
+    }
+  ],
+  "boundary": "Only selected files compared. New unselected files outside the report. Saved action relevance unvalidated. No task or blocker marked complete."
+}

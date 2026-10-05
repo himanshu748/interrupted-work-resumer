@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Save a checkpoint of selected project files. Compare what changed and return with a reviewable continuation note.">
+  <title>Interrupted Work Resumer — Come back with context</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/fonts.css">
+  <link rel="stylesheet" href="/marketing.css">
+  <link rel="stylesheet" href="/resumer-design.css">
+  <script type="module" src="/resumer-landing.js"></script>
+</head>
+<body class="resumer-landing">
+  <a class="resumer-skip" href="#main">Skip to content</a>
+  <header class="resumer-site-header resumer-container">
+    <a class="resumer-wordmark" href="/products/resumer" aria-label="Interrupted Work Resumer home">Resumer<span aria-hidden="true">.</span></a>
+    <nav aria-label="Resumer navigation"><a href="/">Home</a><a href="#how-it-works">How it works</a><a class="resumer-link-button" href="/resumer">Open workspace <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a></nav>
+  </header>
+  <main id="main">
+    <section class="resumer-hero resumer-container" aria-labelledby="resumer-hero-title">
+      <div class="resumer-hero-copy">
+        <h1 id="resumer-hero-title">Come back<br> with context.</h1>
+        <p>You left with a next step. The files changed. Pick up the thread before you act.</p>
+        <p class="resumer-hero-detail">Save selected text files and your work context. Return to a literal comparison and a continuation note you can review.</p>
+        <a class="resumer-primary-link" href="/resumer">Start your continuation <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a>
+        <p class="resumer-local-note">Local file comparison. Your next action stays yours.</p>
+      </div>
+      <div class="resumer-journal-demo" aria-label="Interactive synthetic checkpoint example">
+        <div class="resumer-document-top"><span>Website preview</span><span>Synthetic example</span></div>
+        <div class="resumer-checkpoint-tabs" role="tablist" aria-label="Example checkpoint view" data-view="return">
+          <button id="checkpoint-tab" type="button" role="tab" aria-selected="false" aria-controls="checkpoint-sample" tabindex="-1" disabled><span>At checkpoint</span><small>What you saved</small></button>
+          <button id="return-tab" type="button" role="tab" aria-selected="true" aria-controls="return-sample" disabled><span>On return</span><small>What changed</small></button>
+          <span class="resumer-tab-rule" aria-hidden="true"></span>
+        </div>
+        <section id="return-sample" class="resumer-sample-content" role="tabpanel" aria-labelledby="return-tab" tabindex="0">
+          <h2>A different next step.</h2>
+          <div class="resumer-file-heading"><code>plan.md</code><span class="resumer-change-label">Changed</span></div>
+          <div class="resumer-diff-text"><p><span class="resumer-diff-sign" aria-hidden="true">−</span><span class="resumer-visually-hidden">Before: </span>Next: prepare a public preview.</p><p><span class="resumer-diff-sign" aria-hidden="true">+</span><span class="resumer-visually-hidden">After: </span>Next: review the revised accessibility requirements before publishing.</p></div>
+          <div class="resumer-file-heading resumer-deleted-file"><code>handoff.md</code><span>Deleted</span></div>
+        </section>
+        <section id="checkpoint-sample" class="resumer-sample-content" role="tabpanel" aria-labelledby="checkpoint-tab" tabindex="0" hidden>
+          <h2>A place to leave off.</h2>
+          <div class="resumer-file-heading"><code>plan.md</code><span class="resumer-change-label resumer-saved-label">Saved</span></div>
+          <div class="resumer-saved-text"><p># Release plan</p><p>Next: prepare a public preview.</p></div>
+          <div class="resumer-file-heading resumer-deleted-file"><code>handoff.md</code><span>Saved</span></div>
+        </section>
+        <div class="resumer-return-note"><h3>Your saved action</h3><p>“Publish the preview after checking the release plan.”</p><span id="resumer-sample-guidance">Review it against the changed files before continuing.</span></div>
+        <div class="resumer-document-bottom"><span>Selected files only</span><span>No action executed</span></div>
+        <p id="resumer-example-unavailable" class="resumer-example-unavailable">The return view is shown below the tabs. Switching views requires JavaScript and the local page module.</p>
+      </div>
+    </section>
+    <section id="how-it-works" class="resumer-story" aria-labelledby="resumer-story-title">
+      <div class="resumer-container resumer-story-layout">
+        <div class="resumer-story-intro"><h2 id="resumer-story-title">Leave a thread.<br> Find it again.</h2><p>The useful details are often small: a changed requirement, a missing handoff, a decision that still needs checking.</p><a href="/resumer">Try the two-file example <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a></div>
+        <ol class="resumer-story-steps">
+          <li><h3>Save the stopping point.</h3><p>Choose the text files that matter. Add your goal, next action, decisions, and blockers. Only your selected paths enter the checkpoint.</p><span>Checkpoint</span></li>
+          <li><h3>See the difference.</h3><p>Return to a literal comparison of saved and current contents. Changed, deleted, and unchanged files stay distinct from your saved intentions.</p><span>Observation</span></li>
+          <li><h3>Take the thread with you.</h3><p>Download a Markdown continuation with your context and change evidence. Review the next step before carrying it out.</p><span>Continuation</span></li>
+        </ol>
+      </div>
+    </section>
+    <section class="resumer-local-evidence resumer-container" aria-labelledby="resumer-evidence-title">
+      <div class="resumer-evidence-heading"><h2 id="resumer-evidence-title">A note made by<br>the working product.</h2><p>In this synthetic two-file run, <code>plan.md</code> changed and <code>handoff.md</code> was deleted. The workspace saved a continuation with the original context and literal change evidence.</p></div>
+      <figure class="resumer-evidence-paper">
+        <div class="resumer-evidence-receipt"><strong>Continuation prepared</strong><span>Actual local workspace capture · Synthetic files</span></div>
+        <picture><source media="(max-width: 600px)" srcset="/product-evidence/resumer-local-continuation-mobile.png" width="350" height="731"><img class="resumer-evidence-image" src="/product-evidence/resumer-local-continuation-desktop.png" width="1284" height="612" loading="lazy" alt="Resumer continuation panel showing one changed file, one deleted file, and the downloadable continuation."></picture>
+        <p class="resumer-capture-fallback" hidden>Workspace capture unavailable. The local record below contains the selected-file observations and saved context.</p>
+        <figcaption><span>Selected files compared. Blockers unvalidated. Saved action unexecuted.</span><a href="/product-evidence/resumer-local-continuation.json">Read the local record</a></figcaption>
+      </figure>
+      <p class="resumer-evidence-limit">The record is a public projection of synthetic local evidence with private filesystem paths omitted. No model ran. File changes do not validate a blocker or complete the saved action.</p>
+    </section>
+    <section class="resumer-options resumer-container" aria-labelledby="resumer-options-title">
+      <h2 id="resumer-options-title">A little help,<br> on your terms.</h2>
+      <div class="resumer-option-copy">
+        <article><h3>Let selected files leave a note.</h3><p>Enable a local watch to prepare a continuation when selected files change while the desk is running. The watch checks files and writes a note; it does not run your saved action.</p><span class="resumer-option-boundary">Local · Opt-in · No recurring inference</span></article>
+        <article><h3>Ask for a cited resume plan.</h3><p>With Nebius access configured, choose the file excerpts and saved context to send to NVIDIA Nemotron. Its suggestions cite the selected evidence and remain yours to review.</p><span class="resumer-option-boundary">Selected excerpts · Explicit consent · Live sponsor proof unverified</span></article>
+      </div>
+    </section>
+    <section class="resumer-closing resumer-container" aria-labelledby="resumer-closing-title"><div><h2 id="resumer-closing-title">Leave yourself<br> a better starting point.</h2><p>Start with your files, or explore the built-in synthetic example.</p></div><a class="resumer-primary-link" href="/resumer">Open Work Resumer <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a></section>
+  </main>
+  <footer class="resumer-site-footer resumer-container"><a class="resumer-wordmark" href="/products/resumer">Resumer<span aria-hidden="true">.</span></a><p>A continuation journal for interrupted work.</p><a href="/">Home</a></footer>
+</body>
+</html>

@@ -1,0 +1,10 @@
+node_modules/
+work/
+output/
+.env
+.env.*
+!.env.example
+.DS_Store
+__pycache__/
+.venv*/
+.impeccable/
