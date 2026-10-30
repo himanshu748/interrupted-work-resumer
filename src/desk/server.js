@@ -5,10 +5,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { createResumerService } from '../resumer/service.js';
 import { createInferenceRuntime } from '../integrations/runtime.js';
+import { createTavilyService } from '../integrations/tavily.js';
 
 const sourceRoot = fileURLToPath(new URL('../', import.meta.url));
 const publicRoot = path.join(sourceRoot, 'desk/public');
 const staticFiles = new Map([
+  ['/research.js', [publicRoot, 'research.js']],
+  ['/research.css', [publicRoot, 'research.css']],
   ['/', [publicRoot, 'resumer-landing.html']],
   ['/products/resumer', [publicRoot, 'resumer-landing.html']],
   ['/resumer', [publicRoot, 'resumer.html']],
@@ -62,6 +65,7 @@ export async function startDeskServer({ port = 4190, workspaceRoot = process.cwd
   dataRoot = await realpath(dataRoot);
   const services = {
     inference: inferenceRuntime,
+    research: await (factories.research ?? createTavilyService)({ dataRoot, inferenceRuntime }),
     resumer: await (factories.resumer ?? createResumerService)({ workspaceRoot, dataRoot, inferenceRuntime }),
   };
   const token = randomBytes(32).toString('hex');
@@ -78,7 +82,7 @@ export async function startDeskServer({ port = 4190, workspaceRoot = process.cwd
         const provided = request.headers['x-session-token'];
         if (typeof provided !== 'string' || Buffer.byteLength(provided) !== token.length || !timingSafeEqual(Buffer.from(provided), Buffer.from(token))) return send(response, 403, { error: 'Refresh this local page to renew its session.' });
         if (method !== 'POST') return send(response, 405, { error: 'Use POST for this operation.' }, undefined, { Allow: 'POST' });
-        const match = /^\/api\/(resumer|inference)\/([a-z]+)$/.exec(url.pathname);
+        const match = /^\/api\/(resumer|inference|research)\/([a-z]+)$/.exec(url.pathname);
         if (!match) return send(response, 404, { error: 'Unknown operation.' });
         const data = await services[match[1]].handle(match[2], await jsonBody(request));
         return send(response, 200, data);
@@ -91,7 +95,7 @@ export async function startDeskServer({ port = 4190, workspaceRoot = process.cwd
     } catch (error) {
       if (!response.headersSent && !response.destroyed) {
         const status = error.statusCode ?? (error.code === 'ENOENT' ? 404 : error.code ? 500 : 400);
-        const message = error.code === 'ENOENT' ? 'Requested record or file was not found.'
+        const message = error.statusCode ? error.message : error.code === 'ENOENT' ? 'Requested record or file was not found.'
           : error.code ? 'Local storage is unavailable. Check the server and try again.' : error.message;
         send(response, status, { error: message });
       }

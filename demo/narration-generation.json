@@ -1,0 +1,18 @@
+{
+  "project": "interrupted-work-resumer",
+  "durationSeconds": 89.016,
+  "durationMethod": "macOS afinfo estimate",
+  "provider": "deepgram",
+  "model": "aura-2-thalia-en",
+  "liveGenerationVerified": true,
+  "characters": 1426,
+  "requestId": "01a162e4-ee28-7030-9885-89a20871ea6a",
+  "inputSha256": "5ad6188533a46e1b5a34a40e6456a60540f6adcc62701b227612b4e30104c3aa",
+  "audioSha256": "72c8f05fa778807016b890f5cd66a747459b1020fc1dccb9940afea6d244741d",
+  "audioPath": "demo/narration.mp3",
+  "listeningReview": "pending",
+  "video": "not recorded",
+  "receiptPath": "demo/narration.mp3.receipt.json",
+  "generatedAt": "2026-10-22T09:22:30.339Z",
+  "localCopyHashesVerified": true
+}

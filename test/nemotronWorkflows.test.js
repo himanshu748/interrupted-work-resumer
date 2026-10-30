@@ -4,10 +4,11 @@ import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import path from 'node:path';
 import os from 'node:os';
 import { createResumerService } from '../src/resumer/service.js';
-import { createInferenceRuntime } from '../src/integrations/runtime.js';
+import { createInferenceRuntime, hashStructuredOutput } from '../src/integrations/runtime.js';
 
 const inference = { provider: 'fixture-nebius', model: 'fixture-nemotron', responseModel: 'fixture-nemotron', responseId: 'fixture-response',
   startedAt: '2026-09-29T00:00:00.000Z', completedAt: '2026-09-29T00:00:01.000Z', requestSha256: 'a'.repeat(64), responseSha256: 'b'.repeat(64), usage: {}, liveInferenceVerified: false, transport: 'fixture' };
+const modelResponse = (value) => ({ value, inference: { ...inference, outputSha256: hashStructuredOutput(value) } });
 async function fixture(t) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'nemotron-workflows-'));
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -23,7 +24,7 @@ async function resumerFixture(t, makeResponse) {
   await writeFile(path.join(project, 'not-selected.md'), 'Do not disclose this other file.\n');
   const calls = [];
   const service = await createResumerService({ workspaceRoot: root, dataRoot, inferenceRuntime: { async generate(request) {
-    calls.push(request); return { value: makeResponse(request), inference };
+    calls.push(request); return modelResponse(makeResponse(request));
   } } });
   const { checkpoint } = await service.handle('checkpoint', { projectDirectory: 'project', files: ['plan.md', 'not-selected.md'],
     goal: 'Review the preview', nextAction: 'Publish the preview', decisions: ['Private omitted decision'], blockers: ['Account access is unverified'] });
@@ -82,7 +83,7 @@ test('resumer marks truncated file excerpts and rejects context over the disclos
   const service = await createResumerService({ workspaceRoot: root, dataRoot, inferenceRuntime: { async generate(request) {
     received = request;
     const cited = request.input.evidence.find((entry) => entry.side === 'after');
-    return { value: { summary: { text: 'Review the selected excerpt.', citations: [{ evidenceId: cited.id, quote: 'line 0' }] }, actions: [], questions: [] }, inference };
+    return modelResponse({ summary: { text: 'Review the selected excerpt.', citations: [{ evidenceId: cited.id, quote: 'line 0' }] }, actions: [], questions: [] });
   } } });
   const { checkpoint } = await service.handle('checkpoint', { projectDirectory: '.', files: ['long.md'], goal: 'Review lines', nextAction: 'Inspect changes', decisions: Array.from({ length: 20 }, () => 'x'.repeat(4000)) });
   const { analysis } = await service.handle('analyze', { checkpointId: checkpoint.id, selectedPaths: ['long.md'], contextFields: [], consent: true });
@@ -91,4 +92,75 @@ test('resumer marks truncated file excerpts and rejects context over the disclos
   received = null;
   await assert.rejects(service.handle('analyze', { checkpointId: checkpoint.id, selectedPaths: ['long.md'], contextFields: ['decisions'], consent: true }), /exceeds 64 KiB/);
   assert.equal(received, null);
+});
+test('resumer checks output receipts in history and rebuilds markdown from the verified plan', async (t) => {
+  const { service, checkpoint, dataRoot, root } = await resumerFixture(t, planValue);
+  const { analysis } = await service.handle('analyze', { checkpointId: checkpoint.id, selectedPaths: ['plan.md'], contextFields: [], consent: true });
+  const file = path.join(dataRoot, 'analyses', `${analysis.id}.json`);
+  const restarted = await createResumerService({ workspaceRoot: root, dataRoot });
+  for (const mutate of [
+    (record) => { record.plan.summary.text = 'The saved action has been completed.'; },
+    (record) => { record.plan.actions = []; },
+    (record) => { delete record.inference.outputSha256; },
+  ]) {
+    const changed = structuredClone(analysis);
+    mutate(changed);
+    await writeFile(file, JSON.stringify(changed));
+    await assert.rejects(restarted.handle('analysis', { analysisId: analysis.id }), /does not match its inference receipt/);
+    await assert.rejects(restarted.handle('list'), /does not match its inference receipt/);
+  }
+  await writeFile(file, JSON.stringify({ ...analysis, markdown: '# Everything completed and verified' }));
+  assert.equal((await restarted.handle('analysis', { analysisId: analysis.id })).analysis.markdown, analysis.markdown);
+});
+test('resumer require a matching output receipt before saving new model suggestions', async (t) => {
+  const { root, dataRoot } = await fixture(t);
+  const runtime = { async generate(request) {
+    const value = planValue(request);
+    return { value, inference: { ...inference, outputSha256: '0'.repeat(64) } };
+  } };
+  await writeFile(path.join(root, 'plan.md'), 'Review revised accessibility requirements before publishing.\n');
+  const resumer = await createResumerService({ workspaceRoot: root, dataRoot, inferenceRuntime: runtime });
+  const { checkpoint } = await resumer.handle('checkpoint', { projectDirectory: '.', files: ['plan.md'], goal: 'Review', nextAction: 'Check changes' });
+  await assert.rejects(resumer.handle('analyze', { checkpointId: checkpoint.id, selectedPaths: ['plan.md'], contextFields: [], consent: true }), /does not match its inference receipt/);
+  assert.deepEqual(await readdir(path.join(dataRoot, 'analyses')), []);
+});
+test('legacy resumer records stay readable with unverified output provenance and are never rewritten', async (t) => {
+  const { service, checkpoint, dataRoot, root } = await resumerFixture(t, planValue);
+  const { analysis } = await service.handle('analyze', { checkpointId: checkpoint.id, selectedPaths: ['plan.md'], contextFields: [], consent: true });
+  delete analysis.outputBindingVersion;
+  delete analysis.inference.outputSha256;
+  analysis.inference.liveInferenceVerified = true;
+  const analysisFile = path.join(dataRoot, 'analyses', `${analysis.id}.json`);
+  const analysisBytes = JSON.stringify(analysis);
+  await writeFile(analysisFile, analysisBytes);
+  const restarted = await createResumerService({ workspaceRoot: root, dataRoot });
+  const historical = (await restarted.handle('analysis', { analysisId: analysis.id })).analysis;
+  assert.equal(historical.inference.liveInferenceVerified, false);
+  assert.equal(historical.outputBindingVerified, false);
+  assert.match(historical.markdown, /Legacy analysis has no structured-output hash/);
+  assert.equal((await restarted.handle('list')).checkpoints[0].analyses[0].inference.liveInferenceVerified, false);
+  assert.equal(await readFile(analysisFile, 'utf8'), analysisBytes);
+});
+
+test('resumer workflow schema compile and validate through the real runtime with a fixture transport', async (t) => {
+  const { root, dataRoot } = await fixture(t);
+  const requests = [];
+  const model = 'nvidia/fixture-nemotron';
+  const runtime = createInferenceRuntime({ env: { NEBIUS_API_KEY: 'fixture-key' }, fetchImpl: async (url, options) => {
+    requests.push(url);
+    if (url.endsWith('/models?verbose=true')) return Response.json({ data: [{ id: model }] });
+    const sent = JSON.parse(options.body);
+    const input = JSON.parse(sent.messages[1].content);
+    const value = planValue({ input });
+    return Response.json({ id: 'fixture-completion', model, choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(value) } }], usage: { total_tokens: 50 } });
+  } });
+  await writeFile(path.join(root, 'plan.md'), 'Publish the preview.\n');
+  const resumer = await createResumerService({ workspaceRoot: root, dataRoot, inferenceRuntime: runtime });
+  const { checkpoint } = await resumer.handle('checkpoint', { projectDirectory: '.', files: ['plan.md'], goal: 'Review', nextAction: 'Check changes' });
+  await writeFile(path.join(root, 'plan.md'), 'Review revised accessibility requirements before publishing.\n');
+  const { analysis } = await resumer.handle('analyze', { checkpointId: checkpoint.id, selectedPaths: ['plan.md'], contextFields: [], consent: true });
+  assert.equal(analysis.inference.model, model);
+  assert.equal(analysis.inference.liveInferenceVerified, false);
+  assert.equal(requests.filter((url) => url.endsWith('/chat/completions')).length, 1);
+  assert.ok(requests.every((url) => url.startsWith('https://api.tokenfactory.nebius.com/v1/')));
 });

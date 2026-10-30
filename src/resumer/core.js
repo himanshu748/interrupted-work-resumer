@@ -251,7 +251,7 @@ export function renderContinuation({ state, root, statePath, comparisons, observ
     lines.push(`### ${markdown(file.path)}: ${file.status}`, '', changeExcerpt(file.before.content, file.after?.content ?? null), '');
   }
   if (!comparisons.some((item) => item.status !== 'unchanged')) lines.push('The selected file bytes match the checkpoint. This does not prove that external dependencies or project requirements are unchanged.', '');
-  lines.push('## Continuation checklist', '', '- [ ] Review changed or missing sources and update the saved action if needed.', '- [ ] Recheck each recorded blocker using current evidence.', '- [ ] Carry out the chosen next action and verify its actual result.', '', 'The resumer has prepared this document only. It has not performed the saved action, resolved blockers, monitored the project, or assessed task completion.', '');
+  lines.push('## Continuation checklist', '', '- [ ] Review changed or missing sources and update the saved action if needed.', '- [ ] Recheck each recorded blocker using current evidence.', '- [ ] Carry out the chosen next action and verify its actual result.', '', 'The resumer has prepared this document only. It has not performed the saved action, resolved blockers, inspected unselected files, or assessed task completion.', '');
   return lines.join('\n');
 }
 

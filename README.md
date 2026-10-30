@@ -15,6 +15,12 @@ npm start
 
 Open `http://127.0.0.1:4190/` for the landing. The same landing is available at `/products/resumer`; the working UI is at `/resumer`. `DESK_PORT` changes the port. `DESK_WORKSPACE` selects the parent directory of local projects where applicable. Managed records are stored beneath `work/desk` in that workspace; keep this directory private and outside version control.
 
+## Current sponsor workflow
+
+Nemotron proposes a cited resume plan from explicitly selected local excerpts and context. Tavily retrieves public documentation for a blocker; selected passages feed a separate Nemotron next-step checklist.
+
+Live requests use explicit consent, bounded inputs and a default-deny free-usage guard. See [sponsor setup and receipt boundaries](SPONSORS.md), [recording plan](demo/storyboard.md), and [current release validation](RELEASE-VALIDATION.md). The existing product captures below are historical local observations, not proof of the new sponsor workflow.
+
 ## Verify
 
 ```sh
@@ -30,7 +36,7 @@ See [selected validation](VALIDATION.md) for the current check scope and results
 
 Save selected file evidence and context, then compare changed/deleted files when resuming interrupted work. The selected project must sit within the configured workspace; credential paths and symlinks are excluded. Watch-generated continuations record local observations, never execute the next action or validate claimed blockers. Optional NVIDIA Nemotron planning requires explicit selected-data consent and review.
 
-Live sponsor inference and remote execution proof remain unverified. `.env.example` lists only this product's optional settings. Never commit `.env`, tokens, runtime records or user-selected project files. The server checks exact local Host/Origin, requires a session token for APIs, bounds request size, and serves only explicit static assets. Sibling product pages and APIs are absent.
+No live inference or remote execution was performed by this checkout’s fixture tests; verify release-specific sponsor evidence separately. `.env.example` lists only this product's optional settings. Never commit `.env`, tokens, runtime records or user-selected project files. The server checks exact local Host/Origin, requires a session token for APIs, bounds request size, and serves only explicit static assets. Sibling product pages and APIs are absent.
 
 ## Product capture
 

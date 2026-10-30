@@ -1,0 +1,14 @@
+I left this project with a next step. When I returned, the files had changed.
+
+Interrupted Work Resumer saves a goal, decisions, blockers and the text files I choose. In this synthetic example, the plan changed and the handoff file disappeared. The continuation shows both observations beside the previous context. The old blocker stays unvalidated.
+
+I select the excerpts and context that may leave my machine. NVIDIA Nemotron on Nebius Token Factory uses that selection to suggest a resume plan. Each statement needs a literal citation from the selected evidence. I can inspect those citations and the inference receipt before choosing what to do.
+
+The citation check establishes where the words came from. I still review whether the suggestion makes sense.
+
+With my permission, a local watcher prepares another continuation when the selected files change. It preserves saved artifacts across restarts and watches only the original selection while the desk server is running.
+
+For the next step, I ask Tavily for relevant public documentation, inspect the passages and select sources for Nemotron to draft a cited checklist. I can export both receipts. This research does not execute the saved action or resolve a blocker.
+
+I download the continuation and cited plan to carry into my next work session. This version prepares those artifacts; it does not execute free-text actions or run as a deployed, always-on assistant.
+
